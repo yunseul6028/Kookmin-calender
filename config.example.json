@@ -1,0 +1,31 @@
+{
+  "base_url": "https://ecampus.kookmin.ac.kr",
+
+  "//ics_url": "캘린더 > 내보내기 > '일정 URL 불러오기'로 생성한 개인 구독 주소. 토큰이 들어있으니 외부 노출 금지.",
+  "ics_url": "https://ecampus.kookmin.ac.kr/calendar/export_execute.php?userid=YOURID&authtoken=YOURTOKEN&preset_what=all&preset_time=recentupcoming",
+
+  "//login_id": "포털 통합ID (로그인 화면의 '포털 통합ID' 칸에 넣는 값).",
+  "login_id": "YOUR_PORTAL_ID",
+
+  "//keychain_service": "비밀번호를 저장한 macOS 키체인 서비스 이름. setup.sh가 이 이름으로 저장함.",
+  "keychain_service": "ecampus-kookmin",
+
+  "//calendar_name": "일정을 넣을 맥 캘린더 이름. 없으면 자동 생성됨.",
+  "calendar_name": "eCampus",
+
+  "//capture": "가져올 항목 종류. 사용자가 고른 값: 과제 + 영상.",
+  "capture": {
+    "assignments": true,
+    "videos": true,
+    "events": false
+  },
+
+  "//video_modtypes": "영상/온라인콘텐츠로 취급할 Moodle 활동 타입.",
+  "video_modtypes": ["xncommons", "vod"],
+
+  "//reminder_minutes": "캘린더 이벤트 알림을 마감 몇 분 전에 띄울지.",
+  "reminder_minutes": 1440,
+
+  "//lookahead_days": "지금부터 며칠 이내 마감만 후보로 삼을지. 0이면 제한 없음.",
+  "lookahead_days": 0
+}

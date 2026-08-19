@@ -1,0 +1,14 @@
+# 개인 정보/토큰 포함 — 절대 커밋 금지
+config.json
+state.json
+state.lock
+pending.json
+*.log
+
+# 로컬/시스템
+.claude/
+.DS_Store
+__pycache__/
+*.pyc
+.venv/
+venv/
