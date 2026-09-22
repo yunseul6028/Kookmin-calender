@@ -5,7 +5,13 @@
 from __future__ import annotations
 
 import subprocess
+import time
 from datetime import datetime, timedelta
+
+
+def _launch_calendar() -> None:
+    """캘린더 앱을 백그라운드로 실행(포커스 뺏지 않음). -600 오류 예방/복구용."""
+    subprocess.run(["open", "-gj", "-a", "Calendar"], capture_output=True)
 
 
 def _as_str(s: str) -> str:
@@ -66,6 +72,11 @@ tell application "Calendar"
 end tell
 """
     res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
+    # -600: Calendar 앱이 실행 중이 아님 → 앱을 켜고 한 번 재시도
+    if res.returncode != 0 and "-600" in res.stderr:
+        _launch_calendar()
+        time.sleep(2.5)
+        res = subprocess.run(["osascript", "-e", script], capture_output=True, text=True)
     if res.returncode != 0:
         err = res.stderr.strip()
         if "NO_CALENDAR" in err:

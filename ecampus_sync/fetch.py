@@ -136,6 +136,12 @@ def main() -> int:
     subs = set(state["subscriptions"])
     seen = set(state["seen"])
 
+    # uid 중복 제거 (같은 항목이 여러 번 잡혀도 1건)
+    _uniq: dict[str, dict] = {}
+    for c in candidates:
+        _uniq.setdefault(c["uid"], c)
+    candidates = list(_uniq.values())
+
     candidates.sort(key=lambda c: (c["due"] or datetime.max.replace(tzinfo=KST)))
 
     # 전체 카탈로그 저장 (웹 UI가 강좌별로 그룹핑)

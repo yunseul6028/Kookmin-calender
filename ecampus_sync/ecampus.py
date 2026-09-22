@@ -123,10 +123,14 @@ def scrape_course_videos(session: requests.Session, base_url: str, course_id: st
     course_name = course_name or f"강좌 {course_id}"
 
     out: list[dict] = []
+    seen_modules: set[str] = set()  # 같은 활동이 페이지에 여러 번 렌더링돼도 1회만
     for li in soup.select("li.activity"):
         classes = li.get("class", [])
         modtype = next((c[len("modtype_"):] for c in classes if c.startswith("modtype_")), None)
         if modtype not in video_modtypes:
+            continue
+        mid = (li.get("id") or "").replace("module-", "")
+        if mid and mid in seen_modules:
             continue
         span = li.select_one("span.text-time")
         if not span:
@@ -141,10 +145,11 @@ def scrape_course_videos(session: requests.Session, base_url: str, course_id: st
         # 뒤에 붙는 유형 라벨 정리
         title = re.sub(r"\s*동영상\(KCMS\)\s*$", "", title).strip()
 
-        module_id = (li.get("id") or "").replace("module-", "") or title
+        module_id = mid or title
         link_el = li.select_one("a[href]")
         link = link_el.get("href") if link_el else url
 
+        seen_modules.add(module_id)
         out.append({
             "uid": f"video-{course_id}-{module_id}",
             "type": "video",
@@ -196,13 +201,16 @@ def _parse_ics_dt(name_params: str, value: str):
 
 
 def _classify_ics(description: str, summary: str) -> str:
-    d = description.lower()
-    if "mod/assign" in d:
+    # Moodle 캘린더 이벤트는 SUMMARY 끝에 영어 접미사로 유형을 표시한다:
+    #   "... is due"  = 과제/제출 마감,  "... closes" = 퀴즈·설문 마감,  "... opens" = 열림(마감 아님)
+    d = (description or "").lower()
+    s = (summary or "").strip()
+    sl = s.lower()
+    if "mod/assign" in d or sl.endswith("is due") or s.endswith("마감"):
         return "assign"
-    if "mod/quiz" in d:
+    if "mod/quiz" in d or sl.endswith("closes"):
         return "quiz"
-    if re.search(r"(과제|assignment).*(마감|due)", summary, re.I) or summary.endswith("마감"):
-        return "assign"
+    # "opens" 및 접미사 없는 일반 공지는 event 로 (마감이 아님)
     return "event"
 
 
@@ -237,12 +245,14 @@ def parse_ics(ics_text: str) -> list[dict]:
             continue
         summary = ev.get("SUMMARY", "(제목 없음)")
         etype = _classify_ics(ev.get("DESCRIPTION", ""), summary)
+        # Moodle 접미사(is due/closes/opens) 제거해 제목 깔끔하게
+        title = re.sub(r"\s*(is due|closes|opens)\s*$", "", summary.strip(), flags=re.I).strip()
         out.append({
             "uid": "ics-" + ev.get("UID", summary + str(due)),
             "type": etype,
             "type_label": TYPE_LABELS.get(etype, "일정"),
             "course": ev.get("CATEGORIES", ""),
-            "title": summary,
+            "title": title or summary,
             "due": due,
             "allday": ev.get("DTSTART_ALLDAY", False),
             "url": "",
