@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 
 from .calendar_mac import add_event
+from .reminders_mac import add_reminder
 
 NO_COURSE = "(분류 없음)"
 
@@ -29,11 +30,17 @@ def build_event_fields(c: dict):
 
 
 def add_candidate(cfg: dict, c: dict) -> bool:
-    """후보를 캘린더에 추가. 성공 시 True. 마감 없으면 False."""
+    """후보를 캘린더 또는 미리 알림에 추가. 성공 시 True. 마감 없으면 False.
+    config 의 target("calendar"|"reminders")로 대상 결정."""
     fields = build_event_fields(c)
     if not fields:
         return False
     summary, start, end, desc, all_day = fields
-    add_event(cfg["calendar_name"], summary, start, end, desc,
-              reminder_minutes=cfg.get("reminder_minutes"), all_day=all_day)
+    if cfg.get("target", "calendar") == "reminders":
+        add_reminder(cfg.get("reminders_list") or cfg.get("calendar_name", "eCampus"),
+                     summary, start, body=desc,
+                     remind_minutes_before=cfg.get("reminder_minutes"))
+    else:
+        add_event(cfg["calendar_name"], summary, start, end, desc,
+                  reminder_minutes=cfg.get("reminder_minutes"), all_day=all_day)
     return True

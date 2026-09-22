@@ -147,7 +147,12 @@ def main() -> int:
     # 전체 카탈로그 저장 (웹 UI가 강좌별로 그룹핑)
     save_pending([serialize(c) for c in candidates])
 
-    # 구독한 강좌의 미등록 항목은 자동으로 캘린더에 추가
+    # 미리 알림 대상이면 앱을 미리 띄워 안정화
+    if subs and cfg.get("target") == "reminders":
+        from .reminders_mac import ensure_running
+        ensure_running()
+
+    # 구독한 강좌의 미등록 항목은 자동으로 캘린더/미리 알림에 추가
     auto_added = []
     for c in candidates:
         if course_key(c) in subs and c["uid"] not in added:

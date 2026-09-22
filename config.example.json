@@ -10,8 +10,14 @@
   "//keychain_service": "비밀번호를 저장한 macOS 키체인 서비스 이름. setup.sh가 이 이름으로 저장함.",
   "keychain_service": "ecampus-kookmin",
 
-  "//calendar_name": "일정을 넣을 맥 캘린더 이름. 없으면 자동 생성됨.",
+  "//target": "일정을 넣을 대상: 'reminders'(미리 알림, 완료체크 가능) 또는 'calendar'(캘린더).",
+  "target": "reminders",
+
+  "//calendar_name": "target='calendar'일 때 넣을 맥 캘린더 이름. iCloud에 미리 만들어 둬야 함.",
   "calendar_name": "eCampus",
+
+  "//reminders_list": "target='reminders'일 때 넣을 미리 알림 목록 이름. 없으면 자동 생성.",
+  "reminders_list": "eCampus",
 
   "//capture": "가져올 항목 종류. 사용자가 고른 값: 과제 + 영상.",
   "capture": {

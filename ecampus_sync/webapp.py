@@ -208,6 +208,9 @@ class Handler(BaseHTTPRequestHandler):
             to_add = [c for c in catalog if course_key(c) == course
                       and c["uid"] not in already
                       and not (c["uid"] in _seen or _seen.add(c["uid"]))]
+            if to_add and cfg.get("target") == "reminders":
+                from .reminders_mac import ensure_running
+                ensure_running()
             for c in to_add:
                 try:
                     if add_candidate(cfg, c):
